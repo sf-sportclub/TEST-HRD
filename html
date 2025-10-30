@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HRD Rewards • Game</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    :root{ --bg:#0b1020; --panel:#0e152a; --border:#1e293b; --text:#e6edff; --muted:#9fb2ff; --hp:#ef4444; --sp:#22c55e; --bg-light:#f5f7ff; --panel-light:#ffffff; --border-light:#e5e7eb; --text-light:#0f172a; --muted-light:#475569; }
+    *{ font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif; }
+    body.dark{ background: radial-gradient(1400px 700px at 10% -5%, rgba(56,189,248,.15), transparent), radial-gradient(1200px 600px at 92% 0%, rgba(167,139,250,.15), transparent), linear-gradient(180deg, #0a0f1e, #0b1020); color:var(--text); }
+    body.light{ background: radial-gradient(1200px 550px at 15% -10%, rgba(99,102,241,.08), transparent), radial-gradient(1000px 500px at 85% -5%, rgba(2,132,199,.08), transparent), linear-gradient(180deg, #fafcff, #eef2ff); color:var(--text-light); }
+    .card{ border-radius:18px; padding:1.5rem; border:1px solid; transition: all 0.3s ease; }
+    body.dark .card{ background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04)); border-color:var(--border); box-shadow:0 8px 24px rgba(2,6,23,.4), inset 0 1px 0 rgba(255,255,255,.05); }
+    body.light .card{ background:var(--panel-light); border-color:var(--border-light); box-shadow:0 12px 32px rgba(2,6,23,.08), inset 0 1px 0 rgba(255,255,255,.6); }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(2,6,23,.5); }
+    .btn{ display:inline-flex; align-items:center; justify-content:center; gap:.5rem; padding:.75rem 1.5rem; border-radius:12px; font-weight:600; border:2px solid transparent; transition: all 0.2s ease; cursor: pointer; }
+    body.dark .btn-ghost{ background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.12); color:#e1e8ff; }
+    body.dark .btn-ghost:hover{ background:rgba(255,255,255,.15); transform: translateY(-2px); }
+    body.light .btn-ghost{ background:#fff; border-color:var(--border-light); color:#111827; }
+    body.light .btn-ghost:hover{ background:#f8fafc; transform: translateY(-2px); }
+    .btn-primary{ color:#0b1020; background:linear-gradient(135deg,#a7f3d0,#60a5fa); box-shadow: 0 4px 12px rgba(96, 165, 250, 0.3); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(96, 165, 250, 0.4); }
+    .input{ width:100%; padding:.75rem 1rem; border-radius:12px; outline:none; border:2px solid; transition: all 0.2s ease; }
+    body.dark .input{ background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.12); color:#e6edff; }
+    body.light .input{ background:#fff; border-color:var(--border-light); color:#0f172a; }
+    .input:focus{ box-shadow:0 0 0 4px rgba(125,211,252,.25); border-color:#7dd3fc; transform: translateY(-2px); }
+    .chip{ display:inline-flex; align-items:center; gap:.35rem; padding:.35rem .75rem; border-radius:999px; font-size:.75rem; font-weight:500; border:1px solid; }
+    body.dark .chip{ border-color:rgba(255,255,255,.15); background:rgba(255,255,255,.1); color:#dbeafe; }
+    body.light .chip{ border-color:var(--border-light); background:#f1f5f9; color:#1f2937; }
+    .bar{ position:relative; height:16px; border-radius:999px; overflow:hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); }
+    body.dark .bar{ background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.15); }
+    body.light .bar{ background:#eef2ff; border:1px solid var(--border-light); }
+    .bar > span{ position:absolute; inset:0; width:0%; transition:width .5s ease; box-shadow: 0 0 8px rgba(255,255,255,0.3); }
+    .bar-hp > span{ background:linear-gradient(90deg,var(--hp), #fb7185); }
+    .bar-sp > span{ background:linear-gradient(90deg,var(--sp), #86efac); }
+    .avatar{ width:80px; height:80px; border-radius:20px; display:grid; place-items:center; font-size:42px; border:2px solid; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: all 0.3s ease; }
+    .avatar:hover { transform: scale(1.05); }
+    body.dark .avatar{ background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.2); }
+    body.light .avatar{ background:#fff; border-color:var(--border-light); }
+    header.sticky{ position:sticky; top:0; z-index:30; transition: all 0.3s ease; }
+    body.dark header{ background:rgba(17,24,39,.85); border-bottom:1px solid var(--border); backdrop-filter:blur(12px); }
+    body.light header{ background:rgba(255,255,255,.85); border-bottom:1px solid var(--border-light); backdrop-filter:blur(12px); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner{ width:18px; height:18px; border:2px solid rgba(0,0,0,.2); border-top-color:#000; border-radius:9999px; animation:spin .8s linear infinite; }
+    .section-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; position: relative; display: inline-block; }
+    body.dark .section-title:after { content: ''; position: absolute; bottom: -8px; left: 0; width: 50px; height: 3px; background: linear-gradient(90deg, #60a5fa, #a7f3d0); border-radius: 3px; }
+    body.light .section-title:after { content: ''; position: absolute; bottom: -8px; left: 0; width: 50px; height: 3px; background: linear-gradient(90deg, #3b82f6, #10b981); border-radius: 3px; }
+    .stat-card { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 1.5rem; border-radius: 16px; transition: all 0.3s ease; }
+    body.dark .stat-card { background: linear-gradient(145deg, rgba(255,255,255,.08), rgba(255,255,255,.03)); border: 1px solid rgba(255,255,255,.1); }
+    body.light .stat-card { background: linear-gradient(145deg, #ffffff, #f8fafc); border: 1px solid rgba(229, 231, 235, 0.8); }
+    .stat-card:hover { transform: translateY(-5px); }
+    .reward-card { transition: all 0.3s ease; overflow: hidden; }
+    .reward-card:hover { transform: translateY(-5px); }
+    .nav-tab { position: relative; overflow: hidden; transition: all 0.3s ease; }
+    .nav-tab.active:after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, #60a5fa, #a7f3d0); border-radius: 3px; }
+    .floating-action { position: fixed; bottom: 2rem; right: 2rem; z-index: 40; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 8px 24px rgba(0,0,0,0.3); transition: all 0.3s ease; cursor: pointer; }
+    body.dark .floating-action { background: linear-gradient(135deg, #60a5fa, #a7f3d0); color: #0b1020; }
+    body.light .floating-action { background: linear-gradient(135deg, #3b82f6, #10b981); color: white; }
+    .floating-action:hover { transform: scale(1.1) translateY(-5px); box-shadow: 0 12px 32px rgba(0,0,0,0.4); }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 1rem; backdrop-filter: blur(4px); }
+    .modal-content { width: 100%; max-width: 500px; border-radius: 20px; padding: 2rem; animation: modalAppear 0.3s ease-out; }
+    body.dark .modal-content { background: linear-gradient(145deg, #0e152a, #0b1020); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+    body.light .modal-content { background: white; border: 1px solid rgba(229, 231, 235, 0.8); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+    @keyframes modalAppear { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    .pulse { animation: pulse 2s infinite; }    
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(96, 165, 250, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(96, 165, 250, 0); } 100% { box-shadow: 0 0 0 0 rgba(96, 165, 250, 0); } }
+    .gradient-text { background: linear-gradient(135deg, #60a5fa, #a7f3d0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    /* เพิ่มสไตล์สำหรับมือถือ */
+    @media (max-width: 768px) {
+      .card { padding: 1rem; border-radius: 16px; }
+      .section-title { font-size: 1.25rem; }
+      
+      /* ปรับปรุงแท็บนำทางสำหรับมือถือ */
+      .mobile-nav { 
+        position: fixed; 
+        bottom: 0; 
+        left: 0; 
+        right: 0; 
+        background: var(--panel-light); 
+        border-top: 1px solid var(--border-light);
+        display: flex;
+        justify-content: space-around;
+        padding: 0.5rem;
+        z-index: 100;
+      }
+      body.dark .mobile-nav {
+        background: var(--panel);
+        border-top: 1px solid var(--border);
+      }
+      
+      .mobile-nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0.5rem;
+        font-size: 0.75rem;
+        border-radius: 10px;
+        transition: all 0.2s ease;
+        min-width: 60px;
+      }
+      
+      .mobile-nav-item.active {
+        background: rgba(96, 165, 250, 0.15);
+      }
+      
+      .mobile-nav-icon {
+        font-size: 1.25rem;
+        margin-bottom: 0.25rem;
+      }
+      
+      /* ปรับปรุงส่วนหัวสำหรับมือถือ */
+      header.sticky .desktop-nav {
+        display: none;
+      }
+      
+      .mobile-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+      }
+      
+      .mobile-menu-btn {
+        padding: 0.5rem;
+        border-radius: 8px;
+        background: rgba(255,255,255,0.1);
+      }
+      
+      /* ปรับปรุงการแสดงผลเนื้อหาสำหรับมือถือ */
+      .home-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      
+      .stat-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+      }
+      
+      .tile-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+      }
+      
+      .reward-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      
+      /* ปรับปรุงขนาดตัวอักษรและระยะห่างสำหรับมือถือ */
+      .btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+      }
+      
+      .input {
+        padding: 0.75rem;
+        font-size: 0.875rem;
+      }
+      
+      .chip {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.5rem;
+      }
+      
+      /* ปรับปรุงการแสดงผลสำหรับโหมดต่างๆ ให้ชัดเจนขึ้น */
+      body.dark .nav-tab.active {
+        background: rgba(255,255,255,0.15);
+        color: #ffffff;
+        font-weight: 600;
+      }
+      
+      body.light .nav-tab.active {
+        background: rgba(59, 130, 246, 0.1);
+        color: #1f2937;
+        font-weight: 600;
+      }
+      
+      /* ปรับปรุงตัวหนังสือในโหมดต่างๆ ให้ชัดเจน */
+      body.dark .mobile-nav-item {
+        color: #e6edff;
+      }
+      
+      body.light .mobile-nav-item {
+        color: #1f2937;
+      }
+      
+      body.dark .mobile-nav-item.active {
+        color: #60a5fa;
+        font-weight: 600;
+      }
+      
+      body.light .mobile-nav-item.active {
+        color: #3b82f6;
+        font-weight: 600;
+      }
+      
+      /* ปรับปรุง Floating Action Button สำหรับมือถือ */
+      .floating-action {
+        bottom: 5rem;
+        right: 1rem;
+        width: 50px;
+        height: 50px;
+        font-size: 1.25rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .stat-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .tile-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .mobile-nav-item {
+        min-width: 50px;
+        font-size: 0.7rem;
+      }
+      
+      .mobile-nav-icon {
+        font-size: 1.1rem;
+      }
+    }
+    
+    /* สำหรับแท็บเล็ต */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .mobile-nav {
+        display: none;
+      }
+      
+      .home-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .tile-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    /* สำหรับเดสก์ท็อป */
+    @media (min-width: 1025px) {
+      .mobile-nav {
+        display: none;
+      }
+    }
+    
+    /* ปรับปรุงการแสดงผลของแท็บในโหมดต่างๆ ให้ชัดเจน */
+    body.dark .nav-tab {
+      color: #e6edff;
+    }
+    
+    body.light .nav-tab {
+      color: #1f2937;
+    }
+    
+    body.dark .nav-tab:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    
+    body.light .nav-tab:hover {
+      background: rgba(0,0,0,0.05);
+    }
+    
+    /* ปรับปรุงสีตัวอักษรในปุ่มต่างๆ ให้ชัดเจน */
+    body.dark .btn-ghost {
+      color: #e6edff;
+    }
+    
+    body.light .btn-ghost {
+      color: #1f2937;
+    }
+    
+    /* ปรับปรุงการแสดงผลของ modal สำหรับมือถือ */
+    @media (max-width: 768px) {
+      .modal-content {
+        margin: 1rem;
+        padding: 1.5rem;
+        width: calc(100% - 2rem);
+      }
+    }
+
+    /* ปรับปรุงตามคำขอ */
+    /* ปรับการแสดงผลของ Monthly Progress, สินค้าในสต็อก, Daily Login ให้เรียงกระชับ */
+    .compact-stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    
+    .compact-stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 0.75rem;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+    
+    body.dark .compact-stat-item {
+      background: linear-gradient(145deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,255,255,.1);
+    }
+    
+    body.light .compact-stat-item {
+      background: linear-gradient(145deg, #ffffff, #f8fafc);
+      border: 1px solid rgba(229, 231, 235, 0.8);
+    }
+    
+    .compact-stat-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+    
+    .compact-stat-label {
+      font-size: 0.7rem;
+      opacity: 0.9;
+      font-weight: 500;
+    }
+    
+    /* ปรับปรุงการแสดงผลของ Tile ให้กระชับ */
+    .compact-tile-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    
+    .compact-tile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem 0.5rem;
+      border-radius: 12px;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      min-height: 70px;
+    }
+    
+    body.dark .compact-tile {
+      background: linear-gradient(145deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,255,255,.1);
+    }
+    
+    body.light .compact-tile {
+      background: linear-gradient(145deg, #ffffff, #f8fafc);
+      border: 1px solid rgba(229, 231, 235, 0.8);
+    }
+    
+    .compact-tile:hover {
+      transform: translateY(-3px);
+    }
+    
+    .compact-tile-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.25rem;
+    }
+    
+    .compact-tile-label {
+      font-size: 0.7rem;
+      font-weight: 500;
+    }
+    
+    /* ปรับปรุงตัวอักษรเวลาคลิกในโหมดต่างๆ ให้ชัดเจน */
+    body.dark .nav-tab.active,
+    body.dark .mobile-nav-item.active {
+      color: #ffffff !important;
+      font-weight: 600;
+    }
+    
+    body.light .nav-tab.active,
+    body.light .mobile-nav-item.active {
+      color: #1f2937 !important;
+      font-weight: 600;
+    }
+    
+    /* ปรับปรุงการแสดงผลสำหรับมือถือ */
+    @media (max-width: 768px) {
+      .compact-stat-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+      }
+      
+      .compact-tile-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+      }
+      
+      .compact-stat-value {
+        font-size: 1rem;
+      }
+      
+      .compact-stat-label {
+        font-size: 0.65rem;
+      }
+      
+      .compact-tile {
+        padding: 0.6rem 0.4rem;
+        min-height: 65px;
+      }
+      
+      .compact-tile-icon {
+        font-size: 1.25rem;
+      }
+      
+      .compact-tile-label {
+        font-size: 0.65rem;
+      }
+    }
+  </style>
+</head>
+<body class="dark">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const {useState,useEffect,useMemo} = React;
+    const fmt = new Intl.NumberFormat('th-TH');
+
+    // Config
+    const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbw3zj94zZq9g1LeBgz5lvLJ_RnXNyNzeoXmkgTmTKok9raEgBh3bY4ykmh8KpYhDbNZng/exec';
+    const SP_CAP = 10;
+    const MONTH_TARGET = 100;
+    const AVATAR_CHOICES = ['🧑‍🚀','🧙‍♂️','🧝‍♀️','🧑‍💻','🦊','🐱','🐼','🐲','🤖','👽','🧟','🧜‍♀️','🐯','🦄','🧌','🦁','🐻','🐸','🐶','🐰','🐨','🐵','🐧','🐤','🦋','🐢','🐝','🚀','💎','🎮','🎧'];
+
+    // API functions
+    async function callApi(action, payload){
+      try {
+        const res = await fetch(WEBAPP_URL, { method:'POST', body: JSON.stringify({ action, payload }) });
+        const text = await res.text();
+        try{ return JSON.parse(text); }catch(e){ return { ok:false, message:'API error', raw:text }; }
+      } catch (error) {
+        return { ok:false, message:'Network error: ' + error.message };
+      }
+    }
+
+    const apiLogin = (u,p) => callApi('login', { username:u, password:p });
+    const apiGetPoints = (id) => callApi('getPoints', { employeeId:id });
+    const apiGetLedger = (id) => callApi('getLedger', { employeeId:id });
+    const apiGetCatalog = () => callApi('getCatalog', {});
+    const apiGetNewsRules = () => callApi('getNewsRules', {});
+    const apiGetTasks = () => callApi('getTasks', {});
+    const apiSubmitTask = (pl) => callApi('submitTask', pl);
+    const apiUpdateProfile = (pl) => callApi('updateProfile', pl);
+    const apiGetLeaderboard = () => callApi('getLeaderboard', {});
+    const apiCheckEmp = (id) => callApi('checkEmployee', { employeeId:id });
+    const apiRegister = (pl) => callApi('register', pl);
+    const apiForgot = (id,email) => callApi('forgot', { employeeId:id, email });
+    const apiChangePwd = (p) => callApi('changePassword', { employeeId:p.employeeId, username:p.username, currentPassword:p.currentPassword, newPassword:p.newPassword });
+    const apiGetAchievements = () => callApi('getAchievements', {});
+    const apiGetDailyActivities = () => callApi('getDailyActivities', {});
+    const apiClaimDaily = (pl) => callApi('claimDaily', pl);
+
+    // Utility functions
+    const todayKey = () => new Date().toISOString().slice(0,10);
+    function loadSP(){
+      const d=localStorage.getItem('hrd_sp_date');
+      if(d!==todayKey()){ localStorage.setItem('hrd_sp', String(SP_CAP)); localStorage.setItem('hrd_sp_date', todayKey()); return SP_CAP; }
+      const n=+localStorage.getItem('hrd_sp'); return isFinite(n)?n:SP_CAP;
+    }
+    function saveSP(v){ localStorage.setItem('hrd_sp', String(v)); localStorage.setItem('hrd_sp_date', todayKey()); }
+    const parseThaiDate = (s)=>{
+      const m = String(s||'').match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})(?:\s+(\d{1,2}):(\d{2}))?/);
+      if(!m) return 0;
+      const dd=+m[1], mm=+m[2], yy=+m[3] < 100 ? 2000+(+m[3]) : +m[3];
+      const hh=+(m[4]||'0'), mi=+(m[5]||'0');
+      return new Date(yy,mm-1,dd,hh,mi).getTime();
+    };
+    function isImageUrl(s=''){ return /^https?:\/\//i.test(s) || /^data:image\//i.test(s); }
+
+    // Components
+    const Field = ({label,children}) => (<div><label className="text-sm font-medium mb-2 block">{label}</label><div className="mt-1">{children}</div></div>);
+    
+    function PasswordInput({ value, onChange, placeholder="รหัสผ่าน"}){
+      const [show,setShow]=React.useState(false);
+      return (
+        <div className="relative">
+          <input type={show?'text':'password'} value={value} onChange={onChange} placeholder={placeholder} className="input pr-12" autoComplete="new-password"/>
+          <button type="button" onClick={()=>setShow(s=>!s)} className="absolute right-3 top-1/2 -translate-y-1/2 opacity-70 hover:opacity-100 transition-opacity">{show?'🙈':'👁️'}</button>
+        </div>
+      );
+    }
+    
+    const Bar = ({label,value,max,kind})=>{
+      const pct = Math.max(0, Math.min(100, Math.round(100*(max? value/max:0))));
+      return (
+        <div>
+          <div className={"flex items-center justify-between text-sm mb-2"}><div className="font-medium">{label}</div><div className="font-semibold">{pct}%</div></div>
+          <div className={`bar ${kind==='hp'?'bar-hp':'bar-sp'}`}><span style={{width:pct+'%'}}></span></div>
+        </div>
+      );
+    };
+
+    // Auth Components
+    function Login({ onOK, openRegister, openForgot, openChangePwd }){
+      const [u,setU]=useState(''), [p,setP]=useState(''), [err,setErr]=useState(''), [busy,setBusy]=useState(false);
+      const submit = async(e)=>{
+        e.preventDefault(); setErr(''); setBusy(true);
+        const r = await apiLogin(u.trim(), p.trim());
+        if(!r.ok) setErr(r.message||'เข้าสู่ระบบไม่สำเร็จ');
+        else { onOK(r.user); localStorage.setItem('hrd_user', JSON.stringify(r.user)); }
+        setBusy(false);
+      };
+      return (
+        <div className="min-h-screen grid place-items-center p-4">
+          <form onSubmit={submit} className="w-full max-w-md card p-8">
+            <div className="flex flex-col items-center text-center mb-6">
+              <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-cyan-400 to-indigo-500 grid place-items-center text-white text-2xl shadow-lg mb-4">🏆</div>
+              <h1 className="text-2xl font-bold gradient-text mb-2">HRD Rewards</h1>
+              <p className="text-sm opacity-80">กรอก username/password เพื่อเข้าสู่ระบบ</p>
+            </div>
+            <div className="space-y-4">
+              <Field label="Username"><input className="input" value={u} onChange={e=>setU(e.target.value)} placeholder="กรอกชื่อผู้ใช้" /></Field>
+              <Field label="Password"><PasswordInput value={p} onChange={e=>setP(e.target.value)} placeholder="กรอกรหัสผ่าน" /></Field>
+              {err && <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-sm">{err}</div>}
+              <button className="btn btn-primary w-full disabled:opacity-50 h-12 text-base font-semibold" disabled={busy}>
+                {busy ? <><span className="spinner mr-2"></span> กำลังเข้าสู่ระบบ...</> : 'เข้าสู่ระบบ'}
+              </button>
+              <div className="text-sm text-center opacity-80 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex flex-wrap justify-center gap-4">
+                  <button type="button" className="underline hover:no-underline transition-all" onClick={openRegister}>สมัครสมาชิก</button>
+                  <button type="button" className="underline hover:no-underline transition-all" onClick={openForgot}>ลืมรหัสผ่าน</button>
+                  <button type="button" className="underline hover:no-underline transition-all" onClick={openChangePwd}>เปลี่ยนรหัสผ่าน</button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      );
+    }
+
+    function Register({ back }){
+      const [step,setStep]=useState(1);
+      const [exists,setExists]=useState(null);
+      const [f,setF]=useState({ employeeId:'', title:'', name:'', dob:'', email:'', username:'', password:'', password2:'' });
+      const [err,setErr]=useState('');
+      const check = async()=>{ setErr(''); if(!f.employeeId.trim()) return setErr('ใส่รหัสพนักงานก่อน'); const r=await apiCheckEmp(f.employeeId.trim()); setExists(r); setStep(2); };
+      const submit=async()=>{ setErr(''); if(!f.email||!f.username||!f.password||!f.password2) return setErr('กรอกข้อมูลให้ครบ'); if(f.password!==f.password2) return setErr('ยืนยันรหัสผ่านไม่ตรงกัน'); const r=await apiRegister(f); if(!r.ok) return setErr(r.message||'สมัครไม่สำเร็จ'); alert('สมัครสำเร็จ! โปรดเข้าสู่ระบบ'); back(); };
+      return (
+        <div className="min-h-screen grid place-items-center p-4">
+          <div className="w-full max-w-lg card p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold">สมัครสมาชิก</h2>
+              <button className="btn btn-ghost text-sm" onClick={back}>กลับ</button>
+            </div>
+            {step===1?(
+              <div className="space-y-4">
+                <Field label="รหัสพนักงาน *"><input className="input" value={f.employeeId} onChange={e=>setF({...f,employeeId:e.target.value})} placeholder="กรอกรหัสพนักงาน"/></Field>
+                {err && <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-sm">{err}</div>}
+                <div className="flex gap-3 pt-2">
+                  <button className="btn btn-primary flex-1" onClick={check}>ถัดไป</button>
+                  <button className="btn btn-ghost" onClick={back}>ย้อนกลับ</button>
+                </div>
+              </div>
+            ):(
+              <div className="space-y-4">
+                {exists?.exists ? 
+                  <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-sm">พบพนักงาน: <b>{exists.name||f.employeeId}</b></div> : 
+                  <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 text-sm">ไม่พบรหัสนี้ในระบบ กรุณากรอกข้อมูลให้ครบ</div>}
+                {!exists?.exists && (
+                  <>
+                    <Field label="คำนำหน้า"><input className="input" value={f.title} onChange={e=>setF({...f,title:e.target.value})} placeholder="เช่น นาย, นาง"/></Field>
+                    <Field label="ชื่อ-นามสกุล"><input className="input" value={f.name} onChange={e=>setF({...f,name:e.target.value})} placeholder="กรอกชื่อ-นามสกุล"/></Field>
+                    <Field label="วันเกิด"><input className="input" value={f.dob} onChange={e=>setF({...f,dob:e.target.value})} placeholder="รูปแบบ yyyy-mm-dd"/></Field>
+                  </>
+                )}
+                <Field label="Email *"><input className="input" value={f.email} onChange={e=>setF({...f,email:e.target.value})} placeholder="กรอกอีเมล"/></Field>
+                <Field label="Username *"><input className="input" value={f.username} onChange={e=>setF({...f,username:e.target.value})} placeholder="กรอกชื่อผู้ใช้"/></Field>
+                <Field label="Password *"><PasswordInput value={f.password} onChange={e=>setF({...f,password:e.target.value})} placeholder="กรอกรหัสผ่าน"/></Field>
+                <Field label="ยืนยัน Password *"><PasswordInput value={f.password2} onChange={e=>setF({...f,password2:e.target.value})} placeholder="กรอกรหัสผ่านอีกครั้ง"/></Field>
+                {err && <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-sm">{err}</div>}
+                <div className="flex gap-3 pt-2">
+                  <button className="btn btn-primary flex-1" onClick={submit}>สมัครสมาชิก</button>
+                  <button className="btn btn-ghost" onClick={()=>setStep(1)}>ย้อนกลับ</button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    const Forgot = ({ back })=>{
+      const [emp,setEmp]=useState(''), [email,setEmail]=useState(''), [err,setErr]=useState(''), [busy,setBusy]=useState(false);
+      const submit=async()=>{ if(busy) return; setErr(''); setBusy(true); const r=await apiForgot(emp.trim(), email.trim()); setBusy(false); if(!r.ok) return setErr(r.message||'ดำเนินการไม่สำเร็จ'); alert(r.emailed?'ส่งรหัสชั่วคราวไปที่อีเมลแล้ว':'รีเซ็ตสำเร็จ'); back(); };
+      return (
+        <div className="min-h-screen grid place-items-center p-4">
+          <div className="w-full max-w-md card p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold">ลืมรหัสผ่าน</h2>
+              <button className="btn btn-ghost text-sm" onClick={back}>กลับ</button>
+            </div>
+            <Field label="รหัสพนักงาน"><input className="input" value={emp} onChange={e=>setEmp(e.target.value)} placeholder="กรอกรหัสพนักงาน" /></Field>
+            <Field label="Email"><input className="input" value={email} onChange={e=>setEmail(e.target.value)} placeholder="กรอกอีเมลที่ลงทะเบียน" /></Field>
+            {err && <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-sm">{err}</div>}
+            <div className="flex gap-3 pt-2">
+              <button className="btn btn-primary flex-1 disabled:opacity-50" disabled={busy} onClick={submit}>{busy? <>กำลังส่ง...</> : 'ส่งคำขอ'}</button>
+              <button className="btn btn-ghost" disabled={busy} onClick={back}>กลับ</button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const ChangePassword = ({ back })=>{
+      const [f,setF]=useState({ employeeId:'', username:'', currentPassword:'', newPassword:'', confirmNew:'' });
+      const [err,setErr]=useState(''), [busy,setBusy]=useState(false);
+      const submit=async()=>{ if(busy) return; setErr(''); if(!f.employeeId||!f.username||!f.currentPassword||!f.newPassword||!f.confirmNew) return setErr('กรอกข้อมูลให้ครบ'); if(f.newPassword!==f.confirmNew) return setErr('ยืนยันรหัสผ่านไม่ตรงกัน'); setBusy(true); const r=await apiChangePwd(f); setBusy(false); if(!r.ok) return setErr(r.message||'เปลี่ยนรหัสไม่สำเร็จ'); alert('เปลี่ยนรหัสสำเร็จ!'); back(); };
+      return (
+        <div className="min-h-screen grid place-items-center p-4">
+          <div className="w-full max-w-md card p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold">เปลี่ยนรหัสผ่าน</h2>
+              <button className="btn btn-ghost text-sm" onClick={back}>กลับ</button>
+            </div>
+            <Field label="รหัสพนักงาน"><input className="input" value={f.employeeId} onChange={e=>setF({...f,employeeId:e.target.value})} placeholder="กรอกรหัสพนักงาน"/></Field>
+            <Field label="Username"><input className="input" value={f.username} onChange={e=>setF({...f,username:e.target.value})} placeholder="กรอกชื่อผู้ใช้"/></Field>
+            <Field label="รหัสผ่านเดิม"><PasswordInput value={f.currentPassword} onChange={e=>setF({...f,currentPassword:e.target.value})} placeholder="กรอกรหัสผ่านเดิม"/></Field>
+            <Field label="รหัสผ่านใหม่"><PasswordInput value={f.newPassword} onChange={e=>setF({...f,newPassword:e.target.value})} placeholder="กรอกรหัสผ่านใหม่"/></Field>
+            <Field label="ยืนยันรหัสผ่านใหม่"><PasswordInput value={f.confirmNew} onChange={e=>setF({...f,confirmNew:e.target.value})} placeholder="กรอกรหัสผ่านใหม่อีกครั้ง"/></Field>
+            {err && <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-sm">{err}</div>}
+            <div className="flex gap-3 pt-2">
+              <button className="btn btn-primary flex-1 disabled:opacity-50" disabled={busy} onClick={submit}>{busy?<>กำลังบันทึก...</>:'ยืนยัน'}</button>
+              <button className="btn btn-ghost" disabled={busy} onClick={back}>กลับ</button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // Mobile Navigation Component
+    const MobileNav = ({ tab, setTab }) => {
+      const navItems = [
+        { id: 'home', label: 'หน้าแรก', icon: '🏠' },
+        { id: 'catalog', label: 'แลกของ', icon: '🛒' },
+        { id: 'tasks', label: 'ภารกิจ', icon: '📋' },
+        { id: 'news', label: 'ประกาศ', icon: '📢' },
+        { id: 'history', label: 'ประวัติ', icon: '📊' },
+        { id: 'me', label: 'โปรไฟล์', icon: '👤' }
+      ];
+
+      return (
+        <div className="mobile-nav">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setTab(item.id)}
+              className={`mobile-nav-item ${tab === item.id ? 'active' : ''}`}
+            >
+              <div className="mobile-nav-icon">{item.icon}</div>
+              <div>{item.label}</div>
+            </button>
+          ))}
+        </div>
+      );
+    };
+
+    // Main App Components
+    const Header = ({ user, tab, setTab, onLogout, sp, theme, setTheme })=> {
+      const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+      
+      return (
+        <header className="sticky">
+          <div className="max-w-7xl mx-auto px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-cyan-400 to-indigo-500 grid place-items-center text-white shadow-md">★</div>
+                <div className="leading-tight hidden sm:block">
+                  <div className="font-bold text-lg">HRD Rewards</div>
+                  <div className="text-xs opacity-80 flex items-center gap-2">
+                    <span>{user?.id||''}</span><span>•</span><span className="flex items-center gap-1">⚡ {sp}/{SP_CAP}</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Desktop Navigation */}
+              <nav className="hidden md:flex items-center gap-1 desktop-nav">
+                {[['home','หน้าแรก','🏠'],['catalog','แลกของ','🛒'],['tasks','ภารกิจ','📋'],['news','ประกาศ/กติกา','📢'],['history','ประวัติ','📊'],['me','โปรไฟล์','👤']].map(([id,label,icon])=> (
+                  <button key={id} onClick={()=>setTab(id)} className={`nav-tab px-4 py-2 rounded-xl transition-all ${tab===id?'active bg-white/10 text-white font-semibold':'btn-ghost'}`}>
+                    <span className="mr-2">{icon}</span>{label}
+                  </button>
+                ))}
+                <button className="btn btn-ghost ml-2" onClick={()=>setTheme(t=>t==='dark'?'light':'dark')}>{theme==='dark'?'🌙':'☀️'}</button>
+              </nav>
+              
+              <div className="flex items-center gap-3">
+                <div className="hidden sm:block text-right">
+                  <div className="text-sm font-semibold">{user?.alias||user?.name||'-'}</div>
+                  <div className="text-xs opacity-80">{fmt.format(user?.points||0)} HP</div>
+                </div>
+                
+                {/* Mobile Menu Button */}
+                <div className="md:hidden flex items-center gap-2">
+                  <button className="btn btn-ghost" onClick={()=>setTheme(t=>t==='dark'?'light':'dark')}>{theme==='dark'?'🌙':'☀️'}</button>
+                  <button className="btn btn-ghost" onClick={onLogout}>ออก</button>
+                </div>
+                
+                <button className="btn btn-ghost hidden md:block" onClick={onLogout}>ออกจากระบบ</button>
+              </div>
+            </div>
+            
+            {/* Mobile Navigation will be rendered separately at the bottom */}
+          </div>
+        </header>
+      );
+    };
+
+    const Tile = ({icon,label,sub,onClick, highlight})=> (
+      <button onClick={onClick} className={`w-full border rounded-xl p-4 transition-all text-left hover:transform hover:-translate-y-1 ${highlight ? 'pulse border-cyan-400/50' : ''}`}>
+        <div className="flex items-center gap-3">
+          <div className="text-2xl">{icon}</div>
+          <div className="flex-1"><div className="font-semibold text-left">{label}</div>{sub && <div className="text-xs opacity-70 text-left mt-1">{sub}</div>}</div>
+          <div className="text-xl opacity-70">›</div>
+        </div>
+      </button>
+    );
+
+    // Compact Tile Component สำหรับการแสดงผลแบบกระชับ
+    const CompactTile = ({icon, label, onClick, highlight}) => (
+      <button onClick={onClick} className={`compact-tile ${highlight ? 'pulse' : ''}`}>
+        <div className="compact-tile-icon">{icon}</div>
+        <div className="compact-tile-label">{label}</div>
+      </button>
+    );
+
+    const Home = ({ user, sp, ledger, leaderboard, setTab, catalog, dailyMeta, claimDaily, claiming })=>{
+      const monthEarned = (ledger||[]).filter(x=>x.delta>0 && (new Date()).getMonth()===(new Date(parseThaiDate(x.dateText))).getMonth()).reduce((s,x)=>s+x.delta,0);
+      const canClaimDaily = dailyMeta?.canClaim;
+      const dailyPoint = dailyMeta?.point || 1;
+      const itemsInStock = (catalog||[]).filter(i => (i.stock ?? 0) > 0).length;
+      const spotlight = [...(catalog||[])].sort((a,b)=>(b.points||0)-(a.points||0)).slice(0,3);
+
+      return (
+        <div className="space-y-6 pb-20 md:pb-16">
+          <div className="card p-4 md:p-6">
+            <div className="flex items-center gap-4 md:gap-5">
+              <div className="avatar text-3xl md:text-4xl">{user.avatar? user.avatar : '🧑‍🚀'}</div>
+              <div className="flex-1">
+                <div className="text-slate-400 text-sm">ยินดีต้อนรับ</div>
+                <div className="text-xl md:text-2xl font-bold">{user.alias||user.name} • {user.id}</div>
+                <div className="text-sm opacity-80 mt-1">คะแนนคงเหลือ: <b className="text-lg">{fmt.format(user.points)} HP</b> • ⚡ {sp}/{SP_CAP}</div>
+              </div>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4 mt-6">
+              <Bar label="HP (ระดับปัจจุบัน)" value={user.points%1000} max={1000} kind="hp"/>
+              <Bar label="SP วันนี้" value={sp} max={SP_CAP} kind="sp"/>
+            </div>
+            
+            {/* แทนที่ stat-grid ด้วย compact-stat-grid */}
+            <div className="compact-stat-grid">
+              <div className="compact-stat-item">
+                <div className="compact-stat-value text-emerald-500">{Math.min(monthEarned, MONTH_TARGET)}/{MONTH_TARGET}</div>
+                <div className="compact-stat-label">🎯 Monthly Progress</div>
+              </div>
+              <div className="compact-stat-item">
+                <div className="compact-stat-value text-amber-500">{itemsInStock}</div>
+                <div className="compact-stat-label">🛍️ สินค้าในสต็อก</div>
+              </div>
+              <div className="compact-stat-item">
+                <button 
+                  className={`btn ${canClaimDaily?'btn-primary pulse':'btn-ghost opacity-60'} w-full`} 
+                  disabled={!canClaimDaily || claiming} 
+                  onClick={claimDaily}
+                  style={{padding: '0.5rem', fontSize: '0.7rem'}}
+                >
+                  {claiming ? 'กำลังรับ...' : (canClaimDaily? `รับ +${dailyPoint} HP` : 'รับแล้ว')}
+                </button>
+                <div className="compact-stat-label" style={{marginTop: '0.5rem'}}>🔥 Daily Login</div>
+              </div>
+            </div>
+            
+            {/* แทนที่ tile-grid ด้วย compact-tile-grid */}
+            <div className="compact-tile-grid">
+              <CompactTile icon="📋" label="ภารกิจวันนี้" onClick={()=>setTab('tasks')} highlight={sp > 0}/>
+              <CompactTile icon="🛒" label="เปิดตะกร้า" onClick={()=>setTab('catalog')}/>
+              <CompactTile icon="💡" label="วิธีได้แต้ม" onClick={()=>setTab('news')}/>
+              <CompactTile icon="📚" label="ดูประวัติ" onClick={()=>setTab('history')}/>
+            </div>
+          </div>
+
+          <div className="card p-4 md:p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="section-title">⭐ Reward Spotlight</h3>
+              <button className="btn btn-ghost text-sm" onClick={()=>setTab('catalog')}>ดูทั้งหมด</button>
+            </div>
+            <div className="grid reward-grid md:grid-cols-3 gap-4">
+              {spotlight.map((r,i)=> (
+                <div key={i} className="reward-card border rounded-xl p-4 flex flex-col">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-16 h-16 rounded-lg overflow-hidden bg-white/5 border flex items-center justify-center">
+                      {isImageUrl(r.image) ? <img src={r.image} alt={r.name} className="w-full h-full object-cover" onError={(e)=>{e.currentTarget.style.display='none';}}/> : <span className="text-3xl">{r.image || '🎁'}</span>}
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold">{r.name}</div>
+                      <div className="text-xs opacity-80 mt-1 flex flex-wrap gap-1"><span className="chip">{r.points} HP</span> <span className="chip">{r.category||'-'}</span></div>
+                    </div>
+                  </div>
+                  <button className="btn btn-primary mt-auto" onClick={()=>setTab('catalog')}>แลก</button>
+                </div>
+              ))}
+              {spotlight.length===0 && <div className="opacity-60 text-center py-8">ยังไม่มีสินค้า</div>}
+            </div>
+          </div>
+
+          <div className="grid home-grid lg:grid-cols-3 gap-6">
+            <div className="card p-4 md:p-5">
+              <h3 className="section-title mb-4">🎖️ Achievements</h3>
+              <ul className="space-y-3">
+                {(dailyMeta.achievements||[]).map((a,i)=> (
+                  <li key={i} className="border rounded-xl p-3 transition-all hover:bg-white/5"><div className="font-semibold">{a.title}</div><div className="text-sm opacity-80 mt-1">{a.detail}</div></li>
+                ))}
+                {(dailyMeta.achievements||[]).length===0 && <li className="text-sm opacity-70 text-center py-4">ยังไม่มีรายการ</li>}
+              </ul>
+            </div>
+            <div className="card p-4 md:p-5">
+              <h3 className="section-title mb-4">🏆 Leaderboard</h3>
+              <ul className="space-y-3">
+                {(leaderboard||[]).slice(0,10).map((x,i)=> (
+                  <li key={i} className={`flex items-center gap-3 p-3 rounded-xl transition-all ${x.employeeId===user.id? 'bg-cyan-500/10 border border-cyan-500/20': 'border'}`}>
+                    <div className="w-6 text-right text-sm font-bold">#{i+1}</div>
+                    <div className="text-xl">{x.avatar||'🧑‍🚀'}</div>
+                    <div className="flex-1 font-medium truncate">{x.name}</div>
+                    <div className="chip font-semibold">{fmt.format(x.points)} HP</div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="card p-4 md:p-5">
+              <h3 className="section-title mb-4">🕒 กิจกรรมล่าสุด</h3>
+              <ul className="space-y-3">
+                {[...(ledger||[])].sort((a,b)=>parseThaiDate(b.dateText)-parseThaiDate(a.dateText)).slice(0,8).map((x,i)=> (
+                  <li key={i} className="text-sm flex items-center gap-3 p-2 rounded-lg transition-all hover:bg-white/5">
+                    <span className="text-xl">{x.delta>0?'🌟':'🎁'}</span>
+                    <span className={x.delta>0?'text-emerald-500 font-semibold':'text-rose-500 font-semibold'}>{x.delta>0?`+${fmt.format(x.delta)}`:`-${fmt.format(Math.abs(x.delta))}`}</span>
+                    <span className="opacity-80 flex-1 truncate">{x.detail}</span>
+                  </li>
+                ))}
+              </ul>
+              <button className="btn btn-ghost w-full mt-4" onClick={()=>setTab('history')}>ดูทั้งหมด</button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const Catalog = ({ user, items, cart, setCart, openCart })=>{
+      const [q,setQ]=useState(''), [cat,setCat]=useState('all');
+      const cats = ['all', ...Array.from(new Set(items.map(x=>x.category)))];
+      const filtered = items.filter(r=>{
+        const okQ = q? (r.name+" "+(r.tags||[]).join(' ')).toLowerCase().includes(q.toLowerCase()) : true;
+        const okC = cat==='all' ? true : (r.category===cat);
+        return okQ && okC;
+      });
+      return (
+        <div className="space-y-6 pb-20 md:pb-16">
+          <div className="card p-4 md:p-5 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+            <div className="flex-1 flex flex-col sm:flex-row gap-3">
+              <input className="input flex-1" placeholder="ค้นหาสินค้า..." value={q} onChange={e=>setQ(e.target.value)}/>
+              <select className="input sm:w-48" value={cat} onChange={e=>setCat(e.target.value)}>{cats.map(c=> <option key={c} value={c}>{c === 'all' ? 'ทั้งหมด' : c}</option>)}</select>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="font-semibold">คะแนนคุณ: <span className="text-lg">{fmt.format(user.points)} HP</span></div>
+              <button className="btn btn-primary" onClick={openCart}>🛒 ตะกร้า {cart.reduce((s,c)=>s+c.qty,0) > 0 ? `(${cart.reduce((s,c)=>s+c.qty,0)})` : ''}</button>
+            </div>
+          </div>
+          <div className="grid gap-4 reward-grid sm:grid-cols-2 lg:grid-cols-3">
+            {filtered.map(r=> (
+              <div key={r.id} className="reward-card card p-4 flex flex-col">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-20 h-20 rounded-xl overflow-hidden bg-white/5 border flex items-center justify-center">
+                    {isImageUrl(r.image) ? <img src={r.image} alt={r.name} className="w-full h-full object-cover" onError={(e)=>{ e.currentTarget.style.display = 'none'; }} /> : <span className="text-4xl">{r.image || '🎁'}</span>}
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-semibold">{r.name}</div>
+                    <div className="text-xs opacity-80 mt-2 flex gap-2 flex-wrap"><span className="chip">{r.points} HP</span><span className="chip">คงเหลือ {r.stock||'-'}</span></div>
+                  </div>
+                </div>
+                <button className={`mt-auto btn ${(user.points||0)>=r.points?'btn-primary':'btn-ghost opacity-50'}`} disabled={(user.points||0)<r.points} onClick={()=>setCart(prev=>{ const has=prev.find(x=>x.id===r.id); return has?prev.map(x=>x.id===r.id?({...x,qty:x.qty+1}):x):[...prev,{...r,qty:1}]; })}>เพิ่มใส่ตะกร้า</button>
+              </div>
+            ))}
+            {!filtered.length && <div className="opacity-70 text-center py-8 col-span-full">ไม่พบรายการ</div>}
+          </div>
+        </div>
+      );
+    };
+
+    // Fixed components for Tasks, News, History, Profile
+    const Tasks = ({ tasks, user, setTab, refresh, sp, setSp })=>{
+      const [open,setOpen]=useState(null);
+      const [date,setDate]=useState(''), [note,setNote]=useState('');
+      const [sending,setSending]=useState(false);
+      
+      const availableTasks = Array.isArray(tasks) ? tasks.filter(task => !task.claimed) : [];
+      const completedTasks = Array.isArray(tasks) ? tasks.filter(task => task.claimed) : [];
+
+      const submit = async()=>{
+        if(!open || !date) return alert('กรุณาใส่วันที่');
+        if(sp <= 0) return alert('พลังงาน (SP) หมดแล้ว');
+        if (sending) return;
+        
+        setSending(true);
+        try{
+          const r = await apiSubmitTask({ taskTitle: open, employeeId: user.id, date, note });
+          if(!r.ok) { alert(r.message || 'ส่งภารกิจไม่สำเร็จ'); return; }
+          const next = Math.max(0, sp - 1); setSp(next); saveSP(next);
+          alert(`ส่งภารกิจเรียบร้อย! (+${r.pointsEarned || 0} HP) • ใช้ SP 1 เหลือ ${next}/${SP_CAP}`);
+          setOpen(null); setDate(''); setNote('');
+          await refresh?.();
+        } catch(error) {
+          alert('เกิดข้อผิดพลาด: ' + error.message);
+        } finally { setSending(false); }
+      };
+
+      return (
+        <div className="space-y-6 pb-20 md:pb-16">
+          <div className="card p-4 md:p-5">
+            <h3 className="section-title mb-4">📋 ภารกิจที่เปิดรับ ({availableTasks.length})</h3>
+            
+            {availableTasks.length === 0 ? (
+              <div className="text-center py-8 opacity-70">
+                <div className="text-4xl mb-4">🎉</div>
+                <div>ไม่มีภารกิจใหม่ในขณะนี้</div>
+                <div className="text-sm mt-2">โปรดตรวจสอบอีกครั้งในภายหลัง</div>
+              </div>
+            ) : (
+              <div className="grid gap-4">
+                {availableTasks.map((task, i) => (
+                  <div key={i} className="reward-card border rounded-xl p-4">
+                    <div className="flex flex-col md:flex-row md:items-center gap-4">
+                      <div className="flex-1">
+                        <div className="font-semibold text-lg flex items-center gap-2 mb-2">
+                          {task.title || task.name}
+                          {task.points && <span className="chip">+{task.points} HP</span>}
+                          <span className="chip">⚡ 1 SP</span>
+                        </div>
+                        <div className="text-sm opacity-80 mb-3">{task.description || task.detail || 'ไม่มีคำอธิบาย'}</div>
+                        {task.deadline && <div className="text-xs opacity-60">⏰ หมดเขต: {task.deadline}</div>}
+                      </div>
+                      <button className={`btn ${sp > 0 ? 'btn-primary' : 'btn-ghost opacity-50'}`} disabled={sp <= 0} onClick={() => setOpen(task.title || task.name)}>{sp > 0 ? 'ส่งภารกิจ' : 'SP หมด'}</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            <div className="text-xs opacity-70 mt-4 text-center">SP จะฟื้นเต็ม {SP_CAP} ทุกวัน • ปัจจุบันมี {sp}/{SP_CAP} SP</div>
+          </div>
+
+          {open && (
+            <div className="modal-overlay">
+              <div className="modal-content">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold">ส่งภารกิจ: {open}</h3>
+                  <span className="chip text-base">⚡ 1 SP</span>
+                </div>
+                <div className="space-y-4">
+                  <Field label="รหัสพนักงาน"><input className="input" value={user.id} disabled /></Field>
+                  <Field label="วันที่ดำเนินการ"><input type="date" className="input" disabled={sending} value={date} onChange={e => setDate(e.target.value)}/></Field>
+                  <Field label="รายละเอียดเพิ่มเติม (ตัวเลือก)"><textarea className="input min-h-[80px]" disabled={sending} value={note} onChange={e => setNote(e.target.value)} placeholder="อธิบายเพิ่มเติมเกี่ยวกับการดำเนินงาน..."/></Field>
+                  <div className="flex gap-3 pt-2">
+                    <button className="btn btn-primary flex-1 disabled:opacity-50" disabled={sending || !date} onClick={submit}>{sending ? <><span className="spinner mr-2"></span>กำลังส่ง...</> : 'ส่งภารกิจ'}</button>
+                    <button className="btn btn-ghost" disabled={sending} onClick={() => setOpen(null)}>ยกเลิก</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    const News = ({ news, rules }) => {
+      const [activeTab, setActiveTab] = useState('news');
+
+      return (
+        <div className="space-y-6 pb-20 md:pb-16">
+          <div className="card p-1 flex gap-1">
+            <button className={`flex-1 py-3 px-4 rounded-lg text-center transition-all ${activeTab === 'news' ? 'bg-white/10 text-white font-semibold' : 'btn-ghost'}`} onClick={() => setActiveTab('news')}>📢 ประกาศ</button>
+            <button className={`flex-1 py-3 px-4 rounded-lg text-center transition-all ${activeTab === 'rules' ? 'bg-white/10 text-white font-semibold' : 'btn-ghost'}`} onClick={() => setActiveTab('rules')}>📜 กติกา</button>
+          </div>
+
+          {activeTab === 'news' ? (
+            <div className="card p-4 md:p-6">
+              <h3 className="section-title mb-6">📢 ประกาศล่าสุด</h3>
+              {news && news.length > 0 ? (
+                <div className="space-y-6">
+                  {news.map((item, index) => (
+                    <div key={index} className="border-b border-gray-200 dark:border-gray-700 pb-6 last:border-0 last:pb-0">
+                      <div className="flex items-start justify-between mb-3">
+                        <h4 className="text-lg font-semibold">{item.title}</h4>
+                        {item.date && <span className="chip text-xs">{item.date}</span>}
+                      </div>
+                      <div className="text-sm opacity-80 leading-relaxed">{item.content}</div>
+                      {item.image && (
+                        <div className="mt-4">
+                          {isImageUrl(item.image) ? (
+                            <img src={item.image} alt={item.title} className="rounded-lg max-w-full h-auto max-h-64 object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }}/>
+                          ) : (
+                            <div className="p-4 bg-white/5 rounded-lg text-center"><span className="text-4xl">{item.image}</span></div>
+                          )}
+                        </div>
+                      )}
+                      {item.link && (
+                        <a href={item.link} target="_blank" rel="noopener noreferrer" className="inline-block mt-3 btn btn-ghost text-sm">🔗 ดูเพิ่มเติม</a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 opacity-70">
+                  <div className="text-4xl mb-4">📭</div>
+                  <div>ไม่มีประกาศในขณะนี้</div>
+                  <div className="text-sm mt-2">โปรดตรวจสอบอีกครั้งในภายหลัง</div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="card p-4 md:p-6">
+              <h3 className="section-title mb-6">📜 กติกาและเงื่อนไข</h3>
+              {rules && rules.length > 0 ? (
+                <div className="space-y-6">
+                  {rules.map((rule, index) => (
+                    <div key={index} className="border-l-4 border-cyan-500 pl-4 py-1">
+                      <h4 className="font-semibold text-lg mb-2">{rule.title}</h4>
+                      <div className="text-sm opacity-80 leading-relaxed">{rule.content}</div>
+                      {rule.points && <div className="mt-2"><span className="chip">🎯 {rule.points} HP</span></div>}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="border-l-4 border-cyan-500 pl-4 py-1">
+                    <h4 className="font-semibold text-lg mb-2">ระบบแต้ม HP</h4>
+                    <div className="text-sm opacity-80 leading-relaxed">- รับแต้มจากการทำภารกิจและกิจกรรมต่างๆ<br/>- ใช้แต้มแลกรางวัลในร้านค้า<br/>- แต้มมีอายุ 1 ปีนับจากวันที่ได้รับ</div>
+                  </div>
+                  <div className="border-l-4 border-emerald-500 pl-4 py-1">
+                    <h4 className="font-semibold text-lg mb-2">ระบบพลังงาน SP</h4>
+                    <div className="text-sm opacity-80 leading-relaxed">- ได้รับ SP ใหม่ {SP_CAP} หน่วยทุกวัน<br/>- ใช้ 1 SP ต่อ 1 ภารกิจ<br/>- SP ที่เหลือไม่สามารถสะสมไปวันถัดไปได้</div>
+                  </div>
+                  <div className="border-l-4 border-amber-500 pl-4 py-1">
+                    <h4 className="font-semibold text-lg mb-2">การแลกรางวัล</h4>
+                    <div className="text-sm opacity-80 leading-relaxed">- สามารถยกเลิกการแลกได้ก่อนได้รับของรางวัล<br/>- ของรางวัลอาจมีการเปลี่ยนแปลงตามสต็อก<br/>- การแลกบางรายการอาจมีเงื่อนไขเพิ่มเติม</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    function History({ user, ledger, refresh }){
+      const [q, setQ] = useState(''); 
+      const [type, setType] = useState('all'); 
+      const [sort, setSort] = useState('latest');
+      
+      const totalEarned = (ledger || []).filter(x => x.delta > 0).reduce((s, x) => s + x.delta, 0);
+      const totalSpent = (ledger || []).filter(x => x.delta < 0).reduce((s, x) => s + Math.abs(x.delta), 0);
+      const transactionCount = (ledger || []).length;
+
+      const filtered = useMemo(() => {
+        let arr = ledger || [];
+        if (q.trim()) { const s = q.trim().toLowerCase(); arr = arr.filter(x => (x.detail || '').toLowerCase().includes(s)); }
+        if (type === 'earn') arr = arr.filter(x => x.delta > 0);
+        if (type === 'spend') arr = arr.filter(x => x.delta < 0);
+        const byDateDesc = (a, b) => parseThaiDate(b.dateText) - parseThaiDate(a.dateText);
+        const byDateAsc = (a, b) => parseThaiDate(a.dateText) - parseThaiDate(b.dateText);
+        const byAmountDesc = (a, b) => Math.abs(b.delta) - Math.abs(a.delta);
+        const byAmountAsc = (a, b) => Math.abs(a.delta) - Math.abs(b.delta);
+        if (sort === 'latest') arr = [...arr].sort(byDateDesc);
+        if (sort === 'oldest') arr = [...arr].sort(byDateAsc);
+        if (sort === 'max') arr = [...arr].sort(byAmountDesc);
+        if (sort === 'min') arr = [...arr].sort(byAmountAsc);
+        return arr;
+      }, [ledger, q, type, sort]);
+
+      return (
+        <div className="space-y-6 pb-20 md:pb-20">
+          <div className="grid stat-grid sm:grid-cols-4 gap-4">
+            <div className="stat-card"><div className="text-xl md:text-2xl font-bold text-emerald-500">+{fmt.format(totalEarned)}</div><div className="text-sm font-medium mt-2">💰 ได้รับทั้งหมด</div></div>
+            <div className="stat-card"><div className="text-xl md:text-2xl font-bold text-rose-500">-{fmt.format(totalSpent)}</div><div className="text-sm font-medium mt-2">🛒 ใช้ไปทั้งหมด</div></div>
+            <div className="stat-card"><div className="text-xl md:text-2xl font-bold text-cyan-500">{fmt.format(user.points)}</div><div className="text-sm font-medium mt-2">💎 คงเหลือปัจจุบัน</div></div>
+            <div className="stat-card"><div className="text-xl md:text-2xl font-bold text-amber-500">{transactionCount}</div><div className="text-sm font-medium mt-2">📊 จำนวนธุรกรรม</div></div>
+          </div>
+
+          <div className="card p-4 md:p-5">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1"><input className="input" placeholder="ค้นหาประวัติ..." value={q} onChange={e => setQ(e.target.value)}/></div>
+              <select className="input md:w-40" value={type} onChange={e => setType(e.target.value)}>
+                <option value="all">ทุกประเภท</option>
+                <option value="earn">ได้รับแต้ม</option>
+                <option value="spend">ใช้แต้ม</option>
+              </select>
+              <select className="input md:w-48" value={sort} onChange={e => setSort(e.target.value)}>
+                <option value="latest">วันที่ล่าสุด</option>
+                <option value="oldest">วันที่เก่าสุด</option>
+                <option value="max">แต้มมากสุด</option>
+                <option value="min">แต้มน้อยสุด</option>
+              </select>
+              <button className="btn btn-ghost md:ml-2" onClick={refresh}>🔄 รีเฟรช</button>
+            </div>
+          </div>
+
+          <div className="card p-4 md:p-5">
+            <h3 className="section-title mb-4">📊 ประวัติการทำธุรกรรม ({filtered.length} รายการ)</h3>
+            {filtered.length === 0 ? (
+              <div className="text-center py-12 opacity-70">
+                <div className="text-4xl mb-4">📭</div>
+                <div>ไม่พบประวัติการทำธุรกรรม</div>
+                <div className="text-sm mt-2">ลองเปลี่ยนตัวกรองหรือช่วงเวลาดู</div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filtered.map((item, index) => (
+                  <div key={index} className="flex items-center justify-between p-4 border rounded-xl hover:bg-white/5 transition-all">
+                    <div className="flex items-center gap-4">
+                      <div className={`text-2xl ${item.delta > 0 ? 'text-emerald-500' : 'text-rose-500'}`}>{item.delta > 0 ? '⬆️' : '⬇️'}</div>
+                      <div><div className="font-semibold">{item.detail}</div><div className="text-sm opacity-70 mt-1">{item.dateText}</div></div>
+                    </div>
+                    <div className={`text-lg font-bold ${item.delta > 0 ? 'text-emerald-500' : 'text-rose-500'}`}>{item.delta > 0 ? '+' : ''}{fmt.format(item.delta)}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    const Profile = ({ user, saveProfile })=>{
+      const [alias, setAlias] = useState(user.alias || '');
+      const [avatar, setAvatar] = useState(user.avatar || '');
+      const [saving, setSaving] = useState(false);
+
+      const doSave = async () => { 
+        setSaving(true);
+        try {
+          const success = await saveProfile({ alias, avatar }); 
+          if(success) alert('บันทึกโปรไฟล์เรียบร้อยแล้ว');
+        } finally { setSaving(false); }
+      };
+
+      const clearAvatar = () => setAvatar('');
+      const randomAvatar = () => setAvatar(AVATAR_CHOICES[Math.floor(Math.random() * AVATAR_CHOICES.length)]);
+
+      return (
+        <div className="space-y-6 pb-20 md:pb-16">
+          <div className="card p-4 md:p-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="flex items-center gap-4">
+                <div className="avatar cursor-pointer text-3xl md:text-4xl" onClick={randomAvatar} title="คลิกเพื่อสุ่มอวาตาร์ใหม่">{avatar || '🧑‍🚀'}</div>
+                <div><div className="text-xl md:text-2xl font-bold">{alias || user.name} • {user.id}</div><div className="text-sm opacity-80 mt-1">คะแนนคงเหลือ <span className="font-semibold">{fmt.format(user.points)} HP</span></div></div>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <button className="btn btn-ghost" onClick={clearAvatar}>ล้างอวาตาร์</button>
+                <button className="btn btn-primary" onClick={doSave} disabled={saving}>{saving ? <><span className="spinner mr-2"></span>กำลังบันทึก...</> : '💾 บันทึกโปรไฟล์'}</button>
+              </div>
+            </div>
+          </div>
+
+          <div className="card p-4 md:p-6">
+            <h3 className="section-title mb-4">✏️ แก้ไขข้อมูลส่วนตัว</h3>
+            <div className="grid md:grid-cols-2 gap-6">
+              <Field label="ชื่อเล่น (Alias)"><input className="input" value={alias} onChange={e => setAlias(e.target.value)} placeholder="กรอกชื่อเล่นของคุณ"/></Field>
+              <div>
+                <label className="text-sm font-medium mb-3 block">อวาตาร์ (คลิกเพื่อเลือก)</label>
+                <div className="grid grid-cols-6 md:grid-cols-8 gap-2 max-h-48 overflow-y-auto p-2 border rounded-xl">
+                  {AVATAR_CHOICES.map((emoji, i) => (
+                    <button key={i} className={`p-2 md:p-3 text-2xl rounded-xl border transition-all ${avatar === emoji ? 'bg-cyan-500/20 border-cyan-500/50 scale-110' : 'opacity-90 hover:bg-white/10 hover:scale-105'}`} onClick={() => setAvatar(emoji)}>{emoji}</button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl"><div className="text-sm text-blue-500">💡 เคล็ดลับ: คลิกที่อวาตาร์ใหญ่ด้านบนเพื่อสุ่มอวาตาร์ใหม่</div></div>
+          </div>
+
+          <div className="card p-4 md:p-6">
+            <h3 className="section-title mb-4">📊 สถิติการใช้งาน</h3>
+            <div className="grid stat-grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="stat-card"><div className="text-xl md:text-2xl font-bold text-emerald-500">{new Date().getFullYear() - new Date(user.joinDate || '2024-01-01').getFullYear()}</div><div className="text-sm font-medium mt-2">ปีที่ร่วมงาน</div></div>
+              <div className="stat-card"><div className="text-xl md:text-2xl font-bold text-amber-500">{Math.floor(user.points / 100)}</div><div className="text-sm font-medium mt-2">ระดับปัจจุบัน</div></div>
+              <div className="stat-card"><div className="text-xl md:text-2xl font-bold text-cyan-500">{user.completedTasks || 0}</div><div className="text-sm font-medium mt-2">ภารกิจสำเร็จ</div></div>
+              <div className="stat-card"><div className="text-xl md:text-2xl font-bold text-purple-500">{user.redeemedItems || 0}</div><div className="text-sm font-medium mt-2">ของรางวัลที่แลก</div></div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // Main App Component
+    function App(){
+      const [theme,setTheme]=useState(localStorage.getItem('hrd_theme')||'dark');
+      useEffect(()=>{ document.body.classList.remove('dark','light'); document.body.classList.add(theme); localStorage.setItem('hrd_theme', theme); }, [theme]);
+
+      const [mode,setMode]=useState('login');
+      const [user,setUser]=useState(null);
+      const [tab,setTab]=useState('home');
+      const [catalog,setCatalog]=useState([]); 
+      const [news,setNews]=useState([]), [rules,setRules]=useState([]); 
+      const [tasks,setTasks]=useState([]);
+      const [ledger,setLedger]=useState([]); 
+      const [lb,setLb]=useState([]);
+      const [cart,setCart]=useState([]); 
+      const [sp,setSp]=useState(loadSP());
+      const [daily,setDaily]=useState({canClaim:false, point:1, achievements:[]});
+      const [claiming,setClaiming]=useState(false);
+
+      useEffect(()=>{ 
+        const saved = localStorage.getItem('hrd_user'); 
+        if(saved){ 
+          try{ 
+            const u=JSON.parse(saved); 
+            setUser(u); 
+            setMode('app'); 
+          } catch(e) {
+            console.error('Error parsing saved user:', e);
+          }
+        } 
+      },[]);
+
+      const loadAppData = async(uid)=>{
+        try {
+          const [cg,nr,tk,pt,lg,lbRes,ach,dailyRaw] = await Promise.all([
+            apiGetCatalog(), apiGetNewsRules(), apiGetTasks(), apiGetPoints(uid), apiGetLedger(uid), apiGetLeaderboard(), apiGetAchievements(), apiGetDailyActivities()
+          ]);
+          if(cg.ok) setCatalog(cg.items||[]);
+          if(nr.ok){ setNews(nr.news||[]); setRules(nr.rules||[]); }
+          if(tk.ok) setTasks(tk.tasks||[]);
+          if(pt.ok) setUser(u=>u?({...u,points:pt.points,tierPoints:pt.points}):u);
+          if(lg.ok) setLedger(lg.items||[]);
+          if(lbRes.ok) setLb(lbRes.items||[]);
+          
+          let achList = [];
+          if(ach?.ok) achList = ach.items||ach.achievements||[];
+          else {
+            achList = [
+              { title:'เข้าร่วมกันติดต่อ 10 วัน', detail:'ทองแดง' },
+              { title:'เข้าร่วมกันติดต่อ 30 วัน', detail:'เงิน' },
+              { title:'เข้าร่วมกันติดต่อ 60 วัน', detail:'ทอง' },
+              { title:'จองเล่นปิงปอง 5 ครั้ง', detail:'ภารกิจพิเศษ' },
+            ];
+          }
+          
+          let point = 1, canClaim = false;
+          if(dailyRaw?.ok){
+            point = dailyRaw.point || dailyRaw.Point || 1;
+            canClaim = !dailyRaw.claimedToday;
+          } else {
+            canClaim = (localStorage.getItem('hrd_daily_date') !== todayKey());
+          }
+          setDaily({ point, canClaim, achievements: achList });
+        } catch (error) {
+          console.error('Error loading app data:', error);
+        }
+      };
+      
+      useEffect(()=>{ 
+        if(mode==='app' && user?.id){ 
+          loadAppData(user.id); 
+        } 
+      }, [mode, user?.id]);
+
+      const refreshAll = async()=>{ 
+        if(!user?.id) return; 
+        const [pt,lg,lbRes] = await Promise.all([apiGetPoints(user.id), apiGetLedger(user.id), apiGetLeaderboard()]); 
+        if(pt.ok) setUser(u=>({...u,points:pt.points,tierPoints:pt.points})); 
+        if(lg.ok) setLedger(lg.items||[]); 
+        if(lbRes.ok) setLb(lbRes.items||[]); 
+      };
+
+      const saveProfile = async({ alias, avatar })=>{
+        const r = await apiUpdateProfile({ employeeId:user.id, alias, avatar });
+        if(r.ok){ 
+          const next={...user, alias:r.alias, avatar:r.avatar}; 
+          setUser(next); 
+          localStorage.setItem('hrd_user', JSON.stringify(next)); 
+          await refreshAll(); 
+          return true; 
+        }
+        alert(r.message||'บันทึกไม่สำเร็จ'); 
+        return false;
+      };
+
+      const claimDaily = async()=>{
+        if(!daily.canClaim || claiming || !user?.id) return;
+        setClaiming(true);
+        try{
+          const r = await apiClaimDaily({ employeeId:user.id });
+          if(r?.ok){
+            await refreshAll();
+            setDaily(d=>({ ...d, canClaim:false }));
+            localStorage.setItem('hrd_daily_date', todayKey());
+            alert(`รับโบนัสรายวัน +${r.point||daily.point} HP`);
+          }else{
+            setUser(u=>({...u, points:(u.points||0) + (daily.point||1)}));
+            setLedger(l=>[{ dateText:new Date().toLocaleDateString('th-TH'), detail:'Daily login bonus', delta:(daily.point||1) }, ...l]);
+            localStorage.setItem('hrd_daily_date', todayKey());
+            setDaily(d=>({ ...d, canClaim:false }));
+            alert(`รับโบนัสรายวัน (โหมดออฟไลน์) +${daily.point||1} HP`);
+          }
+        }finally{
+          setClaiming(false);
+        }
+      };
+
+      if(mode==='login') return <Login onOK={u=>{setUser(u); setMode('app'); setTab('home');}} openRegister={()=>setMode('register')} openForgot={()=>setMode('forgot')} openChangePwd={()=>setMode('change')} />;
+      if(mode==='register') return <Register back={()=>setMode('login')} />;
+      if(mode==='forgot') return <Forgot back={()=>setMode('login')} />;
+      if(mode==='change') return <ChangePassword back={()=>setMode('login')} />;
+
+      return (
+        <div>
+          <Header user={user} tab={tab} setTab={setTab} onLogout={()=>{ setMode('login'); setUser(null); localStorage.removeItem('hrd_user'); }} sp={sp} theme={theme} setTheme={setTheme}/>
+          <main className="max-w-7xl mx-auto px-4 py-6">
+            {tab==='home' && <Home user={user} sp={sp} ledger={ledger} leaderboard={lb} setTab={setTab} catalog={catalog} dailyMeta={daily} claimDaily={claimDaily} claiming={claiming}/> }
+            {tab==='catalog' && <Catalog user={user} items={catalog} cart={cart} setCart={setCart} openCart={()=>alert('เดโมตะกร้า: ยังไม่เปิดใช้งานการจ่ายจริง')}/> }
+            {tab==='tasks' && <Tasks tasks={tasks} user={user} setTab={setTab} refresh={refreshAll} sp={sp} setSp={setSp}/> }
+            {tab==='news' && <News news={news} rules={rules} /> }
+            {tab==='history' && <History user={user} ledger={ledger} refresh={refreshAll}/> }
+            {tab==='me' && <Profile user={user} saveProfile={saveProfile}/> }
+          </main>
+          
+          {/* Mobile Navigation */}
+          <MobileNav tab={tab} setTab={setTab} />
+          
+          <div className="floating-action" onClick={() => setTab('home')}>🏠</div>
+        </div>
+      );
+    }
+
+    // Render App
+    try {
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<App />);
+    } catch (error) {
+      console.error('Error rendering app:', error);
+      document.getElementById('root').innerHTML = `
+        <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; color: white;">
+          <h1 style="margin-bottom: 20px;">เกิดข้อผิดพลาดในการโหลดแอปพลิเคชัน</h1>
+          <p>${error.message}</p>
+          <button onclick="window.location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer;">โหลดใหม่</button>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
